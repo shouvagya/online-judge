@@ -1,27 +1,34 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import {prisma} from "../lib/prisma";
 
-export const createUser = async(
-    req:Request,
-    res:Response
-)=>{
-    try{
-        const { username, email, password } = req.body;
+import { AuthRequest} from "../middleware/authMiddleware";
 
-        const user = await prisma.user.create({
-        data: {
-            username,
-            email,
-            password,
-        },
-        });
 
-        res.status(201).json(user);
-    }
-    catch(err){
-        console.log(err);
-        res.status(500).json({
-            message:"Error creating user",
-        });
-    }
+export const getMe = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user!.userId,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        rating: true,
+        createdAt: true,
+      },
+    });
+
+    res.json(user);
+
+  } catch (error) {
+    res.status(500).json({
+        error:error,
+        message: "Failed to fetch profile",
+    });
+  }
 };

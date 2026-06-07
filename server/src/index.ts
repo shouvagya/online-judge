@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import problemRoutes from "./routes/problemRoutes";
+import testCaseRoutes from "./routes/testCaseRoutes";
 
 dotenv.config();
 
@@ -14,8 +17,11 @@ app.use(express.json());
 
 
 
+app.use("/api/auth",authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/problems",problemRoutes);
+app.use("/api/problems",testCaseRoutes);
 
-app.use("/users", userRoutes);
 
 app.get("/",(req,res)=>{
     res.send("Backend running");
