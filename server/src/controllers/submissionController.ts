@@ -2,6 +2,7 @@ import {Response } from "express";
 import { AuthRequest } from "../middleware/authMiddleware";
 import {prisma} from "../lib/prisma";
 import { SUPPORTED_LANGUAGES } from "../constants/languages";
+import { submissionQueue } from "../queue/submissionQueue";
 
 export const createSubmission = async(
     req:AuthRequest,
@@ -44,6 +45,11 @@ export const createSubmission = async(
                 status:"PENDING",
             },
         });
+
+        await submissionQueue.add(
+            "judgeSubmission",
+            { submissionId: submission.id}
+        )
 
         res.status(201).json(submission);
 

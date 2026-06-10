@@ -10,7 +10,7 @@ import { authorizeRole } from "../middleware/roleMiddleware";
 
 const router = express.Router();
 
-router.post("/:id/testcases",authMiddleware, authorizeRole("ADMIN", "SETTER"),createTestCase);
+router.post("/:id/testcases",authMiddleware, authorizeRole("ADMIN", "SETTER","CONTESTANT"),createTestCase);
 router.get("/:id/testcases",getTestCases);
 
 export default router;
