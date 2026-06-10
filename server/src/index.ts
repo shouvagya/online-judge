@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import problemRoutes from "./routes/problemRoutes";
 import testCaseRoutes from "./routes/testCaseRoutes";
+import submissionRoutes from "./routes/submissionRoutes";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use("/api/auth",authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/problems",problemRoutes);
 app.use("/api/problems",testCaseRoutes);
+app.use("/api/submissions",submissionRoutes);
 
 
 app.get("/",(req,res)=>{
