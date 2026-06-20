@@ -14,8 +14,11 @@ const worker =new Worker(
     "submissionQueue",
 
     async(job)=>{
-        //console.log("Processing submission",job.data.submissionId);
+
         const submissionId = job.data.submissionId;
+
+        console.log(`Processing submission ${submissionId}`);
+
         const submission = await prisma.submission.findUnique({
             where:{
                 id:submissionId,
@@ -26,14 +29,12 @@ const worker =new Worker(
             throw new Error(`Submission ${submissionId} not found`);
         }
 
-        const verdict= await judgeSubmission(submission.code,submission.language);
-
         await prisma.submission.update({
             where:{
                 id:submissionId,
             },
             data:{
-                status:verdict,
+                status:Status.PROCESSING,
             }
         });
 
@@ -50,21 +51,42 @@ const worker =new Worker(
             throw new Error(`Problem ${submission.problemId} not found`);
         }
 
-        console.log({
-            submissionId: submission.id,
-            language: submission.language,
-            problemTitle: problem.title,
-            totalTestCases: problem.testCases.length,
+        if(problem.testCases.length===0){
+            throw new Error("No testcases found");
+        }
+
+        const verdict= await judgeSubmission(
+            submission.code,
+            submission.language,
+            problem.testCases
+        );
+
+
+        await prisma.submission.update({
+            where:{
+                id:submissionId,
+            },
+            data:{
+                status:verdict,
+            }
         });
+
+
+        console.log(`Submission ${submissionId} => ${verdict}`);
     },
 
     {connection}
 );
 
-worker.on("completed",(job)=>{
-    console.log(`Job ${job?.id} completed`);
+
+worker.on("completed",(job, result) => {
+    console.log(`Job ${job?.id} completed`,result);
 });
 
-worker.on("failed",(job,err)=>{
-    console.log(`Job ${job?.id} failed`,err);
+worker.on("failed",(job, err) => {
+    console.log(`Job ${job?.id} failed`,err.message);
+});
+
+worker.on("error", (err) => {
+    console.error(err);
 });
