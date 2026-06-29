@@ -67,7 +67,9 @@ const worker =new Worker(
                 id:submissionId,
             },
             data:{
-                status:verdict,
+                status:verdict.status,
+                runtimeMs: verdict.runtimeMs,
+                memoryKb: verdict.memoryKb
             }
         });
 

@@ -17,6 +17,12 @@ export const register = async(
             }
         )};
 
+        if (typeof password !== "string") {
+            return res.status(400).json({
+                message: "Password must be a string",
+            });
+        };
+
 
         const existingUser = await prisma.user.findFirst({
             where:{
@@ -34,6 +40,7 @@ export const register = async(
         }
 
         const passwordHash = await bcrypt.hash(password,10);
+        //const passwordHash="check";
 
         const user = await prisma.user.create({
             data:{
