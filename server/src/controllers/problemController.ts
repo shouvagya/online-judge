@@ -42,18 +42,47 @@ export const createProblem = async (
   }
 };
 
+
 export const getProblems = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
+    const isPrivileged =
+      req.user?.role === "ADMIN" || req.user?.role === "SETTER";
+
+    const now = new Date();
+
     const problems = await prisma.problem.findMany({
+      where: isPrivileged
+        ? {}
+        : {
+            // Hide a problem if it belongs to at least one contest
+            // that hasn't started yet. Once a contest's startTime
+            // has passed, the problem becomes visible to everyone.
+            NOT: {
+              contestProblems: {
+                some: {
+                  contest: {
+                    startTime: {
+                      gt: now,
+                    },
+                  },
+                },
+              },
+            },
+          },
       select: {
         id: true,
         title: true,
         slug: true,
         difficulty: true,
         tags: true,
+        author:{
+          select:{
+            username:true,
+          }
+        }
       },
     });
 
@@ -74,34 +103,54 @@ export const getProblemBySlug = async (
   try {
     const { slug } = req.params;
 
-    const problem = await prisma.problem.findUnique({
-        where: {
-            slug,
+    const isPrivileged =
+      req.user?.role === "ADMIN" || req.user?.role === "SETTER";
+
+    const problem = await prisma.problem.findFirst({
+      where: {
+        slug,
+
+        ...(isPrivileged
+          ? {}
+          : {
+              NOT: {
+                contestProblems: {
+                  some: {
+                    contest: {
+                      startTime: {
+                        gt: new Date(),
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+      },
+
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
         },
-        include: {
-            author: {
-                select: {
-                    id: true,
-                    username: true,
-                },
-            },
 
-            testCases: {
-                where: {
-                    isSample: true,
-                },
+        testCases: {
+          where: {
+            isSample: true,
+          },
 
-                orderBy: {
-                    orderIndex: "asc",
-                },
+          orderBy: {
+            orderIndex: "asc",
+          },
 
-                select: {
-                    input: true,
-                    expectedOutput: true,
-                    orderIndex: true,
-                },
-            },
+          select: {
+            input: true,
+            expectedOutput: true,
+            orderIndex: true,
+          },
         },
+      },
     });
 
     if (!problem) {

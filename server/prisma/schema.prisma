@@ -89,6 +89,7 @@ model Submission {
 
   user        User    @relation(fields: [userId], references: [id])
   problem     Problem @relation(fields: [problemId], references: [id])
+  contest     Contest?    @relation(fields: [contestId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([problemId])
@@ -98,6 +99,7 @@ model Submission {
 enum Status { 
   PENDING 
   PROCESSING
+  FAILED
   ACCEPTED 
   WRONG_ANSWER 
   TIME_LIMIT_EXCEEDED
@@ -126,6 +128,8 @@ model Contest {
   contestProblems       ContestProblem[]
   contestRegistrations  ContestRegistration[]
   contestStandings      ContestStanding[]
+
+  submissions Submission[]
 
   @@index([startTime])
   @@index([endTime])

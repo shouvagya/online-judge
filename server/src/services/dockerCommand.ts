@@ -11,6 +11,6 @@ export function getDockerCommand(
     --cpus=1 \
     --pids-limit=64 \
     -v "${dockerPath}:/workspace" \
-    cpp-judge \
+    oj-runtime \
     bash -c "${command}"`;
 }

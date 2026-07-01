@@ -9,7 +9,7 @@ export const createSubmission = async(
     res:Response
 )=>{
     try{
-        const { problemId, language, code} = req.body;
+        const { problemId, language, code, contestId} = req.body;
 
         if(!problemId || !language || !code){
             return res.status(400).json({
@@ -17,11 +17,30 @@ export const createSubmission = async(
             });
         }
 
-        const problem = await prisma.problem.findUnique({
-            where:{
-                id:Number(problemId),
+        const isPrivileged = req.user?.role === "ADMIN" || req.user?.role === "SETTER";
+
+        const problem = await prisma.problem.findFirst({
+            where: {
+                id: Number(problemId),
+
+                ...(isPrivileged
+                ? {}
+                : {
+                    NOT: {
+                        contestProblems: {
+                        some: {
+                            contest: {
+                            startTime: {
+                                gt: new Date(),
+                            },
+                            },
+                        },
+                        },
+                    },
+                }),
             },
         });
+        
 
         if(!problem){
             return res.status(400).json({
@@ -36,20 +55,85 @@ export const createSubmission = async(
             });
         }
 
+        let resolvedContestId: number | undefined=undefined;
+
+        if(contestId){
+            const contest = await prisma.contest.findUnique({
+                where:{
+                    id:Number(contestId),
+                }
+            });
+
+            if(!contest){
+                return res.status(400).json({
+                    message:"Contest not found",
+                });
+            }
+
+            const now:Date = new Date();
+
+            if(now < contest.startTime || now> contest.endTime){
+                return res.status(400).json({
+                    message:"Contest is not currently live"
+                });
+            }
+
+            
+
+            const contestProblem = await prisma.contestProblem.findUnique({
+                where:{
+                    contestId_problemId:{
+                        contestId: Number(contestId),
+                        problemId: Number(problemId),
+                    },
+                },
+            });
+
+            // Note: we intentionally do NOT require registration to
+            // submit. Once a contest is live, its problems are public
+            // and anyone can attempt them - but only submissions from
+            // users present in ContestRegistration are counted in the
+            // leaderboard (see getLeaderboard in contestController).
+
+            if(!contestProblem){
+                return res.status(400).json({
+                    message: "Problem is not a part of this contest",
+                });
+            }
+
+            resolvedContestId = Number(contestId);
+
+        }
+
         const submission = await prisma.submission.create({
             data:{
                 userId:req.user!.userId,
                 problemId:Number(problemId),
+                contestId: resolvedContestId,
                 language,
                 code,
                 status:"PENDING",
             },
         });
 
-        await submissionQueue.add(
-            "judgeSubmission",
-            { submissionId: submission.id}
-        )
+        try{
+            await submissionQueue.add(
+                "judgeSubmission",
+                { submissionId: submission.id}
+            );
+        }
+        catch(error){
+            await prisma.submission.update({
+                where:{
+                    id: submission.id,
+                },
+                data:{
+                    status:"FAILED",
+                },
+            });
+            throw error;
+        }
+        
 
         res.status(201).json(submission);
 
@@ -90,7 +174,7 @@ export const getSubmissionById = async(
         });
 
         if(!submission){
-            return res.status(400).json({
+            return res.status(404).json({
                 message:"Submission not found",
             });
         }
@@ -104,8 +188,8 @@ export const getSubmissionById = async(
         res.json(submission);
     }
     catch(error){
+        console.log(error);
         res.status(500).json({
-            error:error,
             message:"Failed to fetch submission",
         });
     }

@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes";
 import problemRoutes from "./routes/problemRoutes";
 import testCaseRoutes from "./routes/testCaseRoutes";
 import submissionRoutes from "./routes/submissionRoutes";
+import contestRoutes from "./routes/contestRoutes";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/problems",problemRoutes);
 app.use("/api/problems",testCaseRoutes);
 app.use("/api/submissions",submissionRoutes);
+app.use("/api/contests",contestRoutes);
 
 
 app.get("/",(req,res)=>{
