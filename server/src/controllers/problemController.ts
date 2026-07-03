@@ -145,6 +145,7 @@ export const getProblemBySlug = async (
           },
 
           select: {
+            id:true,
             input: true,
             expectedOutput: true,
             orderIndex: true,

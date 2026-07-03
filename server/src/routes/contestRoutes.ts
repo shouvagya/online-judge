@@ -6,14 +6,14 @@ import { authorizeRole } from "../middleware/roleMiddleware";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, authorizeRole("ADMIN", "SETTER"),createContest );
+router.post("/", authMiddleware, authorizeRole("ADMIN", "SETTER", "CONTESTANT"),createContest );
 
 router.get("/", getContests);
 router.get("/:id", getContestById);
 
 router.post("/:id/register", authMiddleware, registerForContest);
 
-router.post("/:id/problems",authMiddleware, authorizeRole("ADMIN", "SETTER"), addProblemToContest );
+router.post("/:id/problems",authMiddleware, authorizeRole("ADMIN", "SETTER","CONTESTANT"), addProblemToContest );
 router.get("/:id/problems", optionalAuthMiddleware,getContestProblems);
 
 router.get("/:id/leaderboard", getLeaderboard);
