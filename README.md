@@ -1,73 +1,165 @@
-# React + TypeScript + Vite
+# Online Judge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack Online Judge built from scratch with secure code execution, contest support, authentication, and an online code editor.
 
-Currently, two official plugins are available:
+Users can solve programming problems, run code against custom input, submit solutions to hidden test cases, participate in contests, and view leaderboards.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Authentication
 
-## Expanding the ESLint configuration
+- JWT Authentication
+- Secure password hashing using bcrypt
+- Role-based authorization
+- Roles:
+  - User
+  - Setter
+  - Admin
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Problems
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Browse all problems
+- Difficulty levels
+- Tags
+- Detailed problem statements
+- Sample test cases
+- Hidden test cases
+- Monaco code editor
+- Multiple language support
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Supported Languages:
+
+- C++
+- Java
+- Python
+
+---
+
+### Code Execution
+
+Run code instantly with custom input.
+
+Features:
+
+- Docker sandbox
+- CPU limits
+- Memory limits
+- Process limits
+- Network isolation
+
+---
+
+### Submission System
+
+- Submit solutions
+- Hidden test case evaluation
+- Verdict polling
+- Runtime measurement
+- Submission history
+- Submission details
+
+Supported Verdicts:
+
+- Accepted
+- Wrong Answer
+- Time Limit Exceeded
+- Runtime Error
+- Compilation Error
+
+---
+
+### Contests
+
+- Contest creation
+- Contest registration
+- Contest problems
+- Contest submissions
+- Leaderboard
+- Automatic contest status
+
+---
+
+### Leaderboard
+
+- Contest rankings
+- Total score
+- Solved problems
+- Rank ordering
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- React
+- TypeScript
+- Vite
+- React Router
+- React Query
+- Tailwind CSS
+- Monaco Editor
+
+### Backend
+
+- Node.js
+- Express
+- TypeScript
+- Prisma ORM
+- MySQL
+- Redis
+- BullMQ
+- JWT
+
+### Judge
+
+- Docker
+- GCC
+- OpenJDK
+- Python
+
+---
+
+
+## Architecture
+
+```
+               React Frontend
+                      │
+               REST API (Express)
+                      │
+         ┌────────────┴────────────┐
+         │                         │
+      MySQL                    Redis
+         │                         │
+         └────────────┬────────────┘
+                      │
+                 BullMQ Worker
+                      │
+               Docker Sandbox
+                      │
+          Compile → Execute → Judge
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Security
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- JWT Authentication
+- Password hashing with bcrypt
+- Docker sandboxing
+- No network access during execution
+- Memory limits
+- CPU limits
+- Process limits
+- Role-based access control
+
+---
+
+## Author
+
+**Shouvagya Saha**
